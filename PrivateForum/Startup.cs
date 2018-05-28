@@ -31,13 +31,6 @@ namespace PrivateForum
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // ===== Add Identity ========
-            services.AddIdentity<ApplicationUser, IdentityRole>()
-                .AddEntityFrameworkStores<ApplicationContext>()
-                .AddDefaultTokenProviders();
-
-            services.AddMvc();
-
             var sqlConnectionString = Configuration.GetConnectionString("DataAccessPostgreSqlProvider");
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseNpgsql(
@@ -45,6 +38,13 @@ namespace PrivateForum
                     b => b.MigrationsAssembly("PrivateForum")
                 )
             );
+            // ===== Add Identity ========
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+                .AddEntityFrameworkStores<ApplicationContext>();
+
+            services.AddMvc();
+
+            
 
             //JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
             //services

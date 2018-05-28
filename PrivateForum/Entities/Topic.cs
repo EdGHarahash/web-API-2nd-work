@@ -8,6 +8,7 @@ namespace PrivateForum.Entities
 {
     public class Topic
     {
+        public Topic() { }
         public int Id { get; set; }
 
         [Required]

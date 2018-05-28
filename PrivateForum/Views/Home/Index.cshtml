@@ -1,0 +1,153 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h2>Список пользователей</h2>
+<form name="topicForm">
+    <input type="hidden" name="id" value="0" />
+    <div class="form-group">
+        <label for="name">Заголовок:</label>
+        <input class="form-control" name="name" />
+    </div>
+    <div class="form-group">
+        <label for="age">Возраст:</label>
+        <input class="form-control" name="age" />
+    </div>
+    <div class="panel-body">
+        <button type="submit" class="btn btn-sm btn-primary">Сохранить</button>
+        <a id="reset" class="btn btn-sm btn-primary">Сбросить</a>
+    </div>
+</form>
+<table class="table table-condensed table-striped table-bordered">
+    <thead><tr><th>Id</th><th>Заголовок</th><th>Пользователь</th><th></th></tr></thead>
+    <tbody></tbody>
+</table>
+
+@section Scripts {
+<script>
+    // Получение всех пользователей
+    function GetTopics() {
+        $.ajax({
+            url: '/api/topics',
+            type: 'GET',
+            contentType: "application/json",
+            success: function (topics) {
+                var rows = "";
+                $.each(topics, function (index, topic) {
+                    // добавляем полученные элементы в таблицу
+                    rows += row(topic);
+                })
+                $("table tbody").append(rows);
+            }
+        });
+    }
+    // Получение одного пользователя
+    function GetTopic(id) {
+        $.ajax({
+            url: '/api/topic/' + id,
+            type: 'GET',
+            contentType: "application/json",
+            success: function (topic) {
+                var form = document.forms["topicForm"];
+                form.elements["id"].value = topic.id;
+                form.elements["name"].value = topic.name;
+                form.elements["description"].value = topic.description;
+            }
+        });
+    }
+    // Добавление пользователя
+    function CreateTopic(topicName, topicDescription) {
+        $.ajax({
+            url: "api/topics",
+            contentType: "application/json",
+            method: "POST",
+            data: JSON.stringify({
+                name: topicName,
+                description: topicDescription
+            }),
+            success: function (topic) {
+                reset();
+                $("table tbody").append(row(topic));
+            }
+        })
+    }
+    // Изменение пользователя
+    //function EditUser(userId, userName, userAge) {
+    //    $.ajax({
+    //        url: "api/users",
+    //        contentType: "application/json",
+    //        method: "PUT",
+    //        data: JSON.stringify({
+    //            id: userId,
+    //            name: userName,
+    //            age: userAge
+    //        }),
+    //        success: function (user) {
+    //            reset();
+    //            $("tr[data-rowid='" + user.id + "']").replaceWith(row(user));
+    //        }
+    //    })
+    //}
+
+    // сброс формы
+    function reset() {
+        var form = document.forms["topicForm"];
+        form.reset();
+        form.elements["id"].value = 0;
+    }
+
+    // Удаление пользователя
+    //function DeleteTopic(id) {
+    //    $.ajax({
+    //        url: "api/topics/" + id,
+    //        contentType: "application/json",
+    //        method: "DELETE",
+    //        success: function (user) {
+    //            $("tr[data-rowid='" + topic.id + "']").remove();
+    //        }
+    //    })
+    //}
+    // создание строки для таблицы
+    var row = function (topic) {
+        return "<tr data-rowid='" + topic.id + "'><td>" + topic.id + "</td>" +
+            "<td>" + topic.name + "</td> <td>" + topic.description + "</td>" +
+            "<td><a class='editLink' data-id='" + topic.id + "'>Изменить</a> | " +
+            "<a class='removeLink' data-id='" + topic.id + "'>Удалить</a></td></tr>";
+    }
+    // сброс значений формы
+    $("#reset").click(function (e) {
+
+        e.preventDefault();
+        reset();
+    })
+
+    // отправка формы
+    $("form").submit(function (e) {
+        e.preventDefault();
+        var id = this.elements["id"].value;
+        var name = this.elements["name"].value;
+        var description = this.elements["description"].value;
+        if (id == 0)
+            CreateTopic(name, description);
+        else
+            EditTopic(id, name, description);
+    });
+
+    // нажимаем на ссылку Изменить
+    $("body").on("click", ".editLink", function () {
+        var id = $(this).data("id");
+        GetTopic(id);
+    })
+    // нажимаем на ссылку Удалить
+    $("body").on("click", ".removeLink", function () {
+        var id = $(this).data("id");
+        DeleteTopic(id);
+    })
+
+    // загрузка пользователей
+    GetTopics();
+
+</script>
+}
+

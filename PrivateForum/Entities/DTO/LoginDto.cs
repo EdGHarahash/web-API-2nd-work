@@ -8,6 +8,8 @@ namespace PrivateForum.Entities.DTO
 {
     public class LoginDto
     {
+        public LoginDto(){}
+
         [Required]
         public string Email { get; set; }
 

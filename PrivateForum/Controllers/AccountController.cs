@@ -1,15 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
+﻿
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
 using PrivateForum.Entities;
 using PrivateForum.Entities.DTO;
 
@@ -18,19 +10,16 @@ namespace PrivateForum.Controllers
     [Route("[controller]/[action]")]
     public class AccountController : Controller
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly IConfiguration _configuration;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public AccountController(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
-            IConfiguration configuration
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager
             )
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _configuration = configuration;
         }
         [HttpGet]
         public IActionResult Register()
@@ -45,7 +34,6 @@ namespace PrivateForum.Controllers
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginDto model)
         {
             if (ModelState.IsValid)
