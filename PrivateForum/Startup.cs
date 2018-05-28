@@ -11,6 +11,11 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using PrivateForum.Context;
 using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using PrivateForum.Entities;
 
 namespace PrivateForum
 {
@@ -26,10 +31,8 @@ namespace PrivateForum
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddDbContext<ApplicationContext>();
-
             // ===== Add Identity ========
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationContext>()
                 .AddDefaultTokenProviders();
 
@@ -43,23 +46,27 @@ namespace PrivateForum
                 )
             );
 
-            //services.AddScoped<IDataAccessProvider, DataAccessPostgreSqlProvider.DataAccessPostgreSqlProvider>();
-
-            //JsonOutputFormatter jsonOutputFormatter = new JsonOutputFormatter
-            //{
-            //    SerializerSettings = new JsonSerializerSettings
+            //JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
+            //services
+            //    .AddAuthentication(options =>
             //    {
-            //        ReferenceLoopHandling = ReferenceLoopHandling.Ignore
-            //    }
-            //};
+            //        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            //        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 
-            //services.AddMvc(
-            //    options =>
+            //    })
+            //    .AddJwtBearer(cfg =>
             //    {
-            //        options.OutputFormatters.Clear();
-            //        options.OutputFormatters.Insert(0, jsonOutputFormatter);
-            //    }
-            //);
+            //        cfg.RequireHttpsMetadata = false;
+            //        cfg.SaveToken = true;
+            //        cfg.TokenValidationParameters = new TokenValidationParameters
+            //        {
+            //            ValidIssuer = Configuration["JwtIssuer"],
+            //            ValidAudience = Configuration["JwtIssuer"],
+            //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtKey"])),
+            //            ClockSkew = TimeSpan.Zero // remove delay of token when expire
+            //        };
+            //    });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -74,8 +81,9 @@ namespace PrivateForum
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseStaticFiles();
             app.UseMvc();
+            app.UseAuthentication();
             dbContext.Database.EnsureCreated();
         }
     }
