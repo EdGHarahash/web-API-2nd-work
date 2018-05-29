@@ -18,6 +18,7 @@ namespace PrivateForum.Entities
         public virtual ICollection<Mark> Marks { get; set; }
         public ApplicationUser()
         {
+            Tags = new HashSet<Tag>();
         }
     }
 }

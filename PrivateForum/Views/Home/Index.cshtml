@@ -15,6 +15,10 @@
             <input class="form-control" name="name" />
         </div>
         <div class="form-group">
+            <label for="tag">Tag:</label>
+            <input class="form-control" name="tag" />
+        </div>
+        <div class="form-group">
             <label for="description">description:</label>
             <textarea class="form-control" name="description"></textarea>
         </div>
@@ -24,8 +28,8 @@
         </div>
     </form>
 </div>
-<table id ="allTopics"class="table table-condensed table-striped table-bordered">
-    <thead><tr><th>Id</th><th>Заголовок</th><th>Пользователь</th><th></th></tr></thead>
+<table id ="allTopics"  style="display:none;" class="table table-condensed table-striped table-bordered">
+    <thead><tr><th>Tag</th><th>Заголовок</th><th>Пользователь</th><th></th></tr></thead>
     <tbody></tbody>
 </table>
 
@@ -54,6 +58,7 @@
                     rows += row(topic);
                 })
                 $("table tbody").append(rows);
+                $("#allTopics").toggle();
             }
         });
     }
@@ -66,22 +71,19 @@
             success: function (topic) {
                 $("#detail").remove();
                 $("table").after(details(topic)); 
-                //var form = document.forms["topicForm"];
-                //form.elements["id"].value = topic.id;
-                //form.elements["name"].value = topic.name;
-                //form.elements["description"].value = topic.description;
             }
         });
     }
     // Добавление пользователя
-    function CreateTopic(topicName, topicDescription) {
+    function CreateTopic(topicName, topicDescription, topicTag) {
         $.ajax({
             url: "../api/topics",
             contentType: "application/json",
             type: "POST",
             data: JSON.stringify({
                 name: topicName,
-                description: topicDescription
+                description: topicDescription,
+                tag: topicTag
             }),
             success: function (topic) {
                 reset();
@@ -133,7 +135,7 @@
     }
 
     var row = function (topic) {
-        return "<tr data-rowid='" + topic.id + "'><td>" + topic.id + "</td>" +
+        return "<tr data-rowid='" + topic.id + "'><td>" + topic.tag + "</td>" +
             "<td>" + topic.name + "</td> <td>" + topic.user + "</td>" +
             "<td><a class='moreLink' data-id='" + topic.id + "'>More</a>";
     }
@@ -148,9 +150,10 @@
     function CatchSubmit(f) {
         var id = f.elements["id"].value;
         var name = f.elements["name"].value;
+        var tag = f.elements["tag"].value;
         var description = f.elements["description"].value;
         if (id == 0)
-            CreateTopic(name, description);
+            CreateTopic(name, description, tag);
         else
             EditTopic(id, name, description);
     };

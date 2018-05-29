@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PrivateForum.Context;
 using PrivateForum.Entities;
+using PrivateForum.Entities.DTO;
 
 namespace PrivateForum.Controllers
 {
@@ -15,17 +18,20 @@ namespace PrivateForum.Controllers
     public class TopicsController : Controller
     {
         private readonly ApplicationContext _context;
+        private UserManager<ApplicationUser> _userManager;
 
-        public TopicsController(ApplicationContext context)
+        public TopicsController(ApplicationContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: api/Topics
         [HttpGet]
-        public IEnumerable<Topic> GetTopics()
+        public IEnumerable<AllTopicDto> GetTopics()
         {
-            return _context.Topics;
+
+            return AllTopicDto.MakeList(_context.Topics.Include(topic=> topic.User).Include(topic => topic.Tag).ToList());
         }
 
         // GET: api/Topics/5
@@ -37,14 +43,15 @@ namespace PrivateForum.Controllers
                 return BadRequest(ModelState);
             }
 
-            var topic = await _context.Topics.SingleOrDefaultAsync(m => m.Id == id);
+            var topic = await _context.Topics.Include(t=>t.User).Include(t => t.Tag).SingleOrDefaultAsync(m => m.Id == id);
 
             if (topic == null)
             {
                 return NotFound();
             }
 
-            return Ok(topic);
+            TopicDetailDto topicDto = new TopicDetailDto(topic);
+            return Ok(topicDto);
         }
 
         // PUT: api/Topics/5
@@ -84,13 +91,14 @@ namespace PrivateForum.Controllers
 
         // POST: api/Topics
         [HttpPost]
-        public async Task<IActionResult> PostTopic([FromBody] Topic topic)
+        public async Task<IActionResult> PostTopic([FromBody] CreateTopicDto createTopic)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
-
+            Topic topic = createTopic.GetTopic();
+            topic.User = _userManager.GetUserAsync(HttpContext.User).Result;
             _context.Topics.Add(topic);
             await _context.SaveChangesAsync();
 

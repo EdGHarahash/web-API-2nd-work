@@ -8,10 +8,17 @@ namespace PrivateForum.Entities
 {
     public class Tag
     {
+        public Tag()
+        {
+            Users = new HashSet<ApplicationUser>();
+        }
+
         public int Id { get; set; }
 
         [Required]
         [StringLength(35)]
         public string Name { get; set; }
+
+        public virtual ICollection<ApplicationUser> Users { get; set; }
     }
 }

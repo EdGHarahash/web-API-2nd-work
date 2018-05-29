@@ -67,6 +67,7 @@ namespace PrivateForum.Controllers
         }
 
         // GET: Topics1/Edit/5
+        [HttpGet("{id}")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -85,7 +86,7 @@ namespace PrivateForum.Controllers
         // POST: Topics1/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        [HttpPost("{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Published,AverangeMark,MarkCount")] Topic topic)
         {
@@ -118,6 +119,7 @@ namespace PrivateForum.Controllers
         }
 
         // GET: Topics1/Delete/5
+        [HttpGet("{id}")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -136,7 +138,7 @@ namespace PrivateForum.Controllers
         }
 
         // POST: Topics1/Delete/5
-        [HttpPost, ActionName("Delete")]
+        [HttpPost("{id}"), ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {

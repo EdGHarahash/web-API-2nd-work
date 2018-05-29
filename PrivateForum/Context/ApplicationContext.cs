@@ -12,6 +12,7 @@ namespace PrivateForum.Context
     public class ApplicationContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<Topic> Topics { get; set; }
+        public DbSet<Tag> Tags { get; set; }
         public DbSet<Invite> Invites { get; set; }
 
         //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
