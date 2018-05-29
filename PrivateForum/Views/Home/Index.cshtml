@@ -4,28 +4,43 @@
 }
 
 <h2>Список пользователей</h2>
-<form name="topicForm">
-    <input type="hidden" name="id" value="0" />
-    <div class="form-group">
-        <label for="name">Заголовок:</label>
-        <input class="form-control" name="name" />
-    </div>
-    <div class="form-group">
-        <label for="age">Возраст:</label>
-        <input class="form-control" name="age" />
-    </div>
-    <div class="panel-body">
-        <button type="submit" class="btn btn-sm btn-primary">Сохранить</button>
-        <a id="reset" class="btn btn-sm btn-primary">Сбросить</a>
-    </div>
-</form>
-<table class="table table-condensed table-striped table-bordered">
+<div class="panel-body">
+    <button type="button" id="createNew" class="btn btn-sm btn-primary" OnClick="Show();">Create new Topic</button>
+</div>
+<div id="createform" style="display:none;">
+    <form display="none" name="topicForm" action="javascript:;" onsubmit="CatchSubmit(this)">
+        <input type="hidden" name="id" value="0" />
+        <div class="form-group">
+            <label for="name">Заголовок:</label>
+            <input class="form-control" name="name" />
+        </div>
+        <div class="form-group">
+            <label for="description">description:</label>
+            <textarea class="form-control" name="description"></textarea>
+        </div>
+        <div class="panel-body">
+            <button type="submit" class="btn btn-sm btn-primary">Сохранить</button>
+            <a id="reset" class="btn btn-sm btn-primary">Сбросить</a>
+        </div>
+    </form>
+</div>
+<table id ="allTopics"class="table table-condensed table-striped table-bordered">
     <thead><tr><th>Id</th><th>Заголовок</th><th>Пользователь</th><th></th></tr></thead>
     <tbody></tbody>
 </table>
 
 @section Scripts {
 <script>
+    function CloseDetail() { 
+        $(".table").toggle();
+        $("#detail").toggle();
+    }
+
+    function Show() {
+        $("#createform").toggle();
+        if ($("#createNew").text() === "Close") { $("#createNew").html("Create new Topic"); }
+        else { $("#createNew").html("Close"); }
+    }
     // Получение всех пользователей
     function GetTopics() {
         $.ajax({
@@ -45,23 +60,25 @@
     // Получение одного пользователя
     function GetTopic(id) {
         $.ajax({
-            url: '/api/topic/' + id,
+            url: '/api/topics/' + id,
             type: 'GET',
             contentType: "application/json",
             success: function (topic) {
-                var form = document.forms["topicForm"];
-                form.elements["id"].value = topic.id;
-                form.elements["name"].value = topic.name;
-                form.elements["description"].value = topic.description;
+                $("#detail").remove();
+                $("table").after(details(topic)); 
+                //var form = document.forms["topicForm"];
+                //form.elements["id"].value = topic.id;
+                //form.elements["name"].value = topic.name;
+                //form.elements["description"].value = topic.description;
             }
         });
     }
     // Добавление пользователя
     function CreateTopic(topicName, topicDescription) {
         $.ajax({
-            url: "api/topics",
+            url: "../api/topics",
             contentType: "application/json",
-            method: "POST",
+            type: "POST",
             data: JSON.stringify({
                 name: topicName,
                 description: topicDescription
@@ -108,12 +125,17 @@
     //        }
     //    })
     //}
-    // создание строки для таблицы
+
+    var details = function (topic) {
+        return "<div id='detail'><div class='row'> <div class='col-md-3'>" + topic.name + "</div><div class='col-md-3'> Создатель:" + topic.user + "</div>" +
+            "<div class='col-md-2'> <button type='button' id='closeDetail' class='btn btn - sm btn - primary' OnClick='CloseDetail();'>Close</button> </div></div>" +
+            "<div class='row'> <div class='col-md-8'> <pre>Текст статьи: \n" + topic.description + "<\/pre></div> </div> </div> </div> "
+    }
+
     var row = function (topic) {
         return "<tr data-rowid='" + topic.id + "'><td>" + topic.id + "</td>" +
-            "<td>" + topic.name + "</td> <td>" + topic.description + "</td>" +
-            "<td><a class='editLink' data-id='" + topic.id + "'>Изменить</a> | " +
-            "<a class='removeLink' data-id='" + topic.id + "'>Удалить</a></td></tr>";
+            "<td>" + topic.name + "</td> <td>" + topic.user + "</td>" +
+            "<td><a class='moreLink' data-id='" + topic.id + "'>More</a>";
     }
     // сброс значений формы
     $("#reset").click(function (e) {
@@ -123,26 +145,21 @@
     })
 
     // отправка формы
-    $("form").submit(function (e) {
-        e.preventDefault();
-        var id = this.elements["id"].value;
-        var name = this.elements["name"].value;
-        var description = this.elements["description"].value;
+    function CatchSubmit(f) {
+        var id = f.elements["id"].value;
+        var name = f.elements["name"].value;
+        var description = f.elements["description"].value;
         if (id == 0)
             CreateTopic(name, description);
         else
             EditTopic(id, name, description);
-    });
+    };
 
     // нажимаем на ссылку Изменить
-    $("body").on("click", ".editLink", function () {
+    $("body").on("click", ".moreLink", function () {
+        $("#allTopics").toggle();
         var id = $(this).data("id");
         GetTopic(id);
-    })
-    // нажимаем на ссылку Удалить
-    $("body").on("click", ".removeLink", function () {
-        var id = $(this).data("id");
-        DeleteTopic(id);
     })
 
     // загрузка пользователей
