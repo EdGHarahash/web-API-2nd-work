@@ -1,5 +1,6 @@
 ﻿
 using Microsoft.AspNetCore.Identity;
+using PrivateForum.Entities.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,11 +15,11 @@ namespace PrivateForum.Entities
         // public List<Topic> Topics { get; set; }
         public virtual ApplicationUser Parent { get; set; }
         public virtual ICollection<ApplicationUser> Invited { get; set; }
-        public virtual ICollection<Tag> Tags { get; set; }
+        public virtual ICollection<ApplicationUserTag> ApplicationUserTags { get; set; }
         public virtual ICollection<Mark> Marks { get; set; }
         public ApplicationUser()
         {
-            Tags = new HashSet<Tag>();
+           
         }
     }
 }

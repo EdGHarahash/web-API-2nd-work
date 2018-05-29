@@ -18,7 +18,7 @@ namespace PrivateForum.Entities.DTO
 
         public Topic GetTopic() => new Topic
         {
-            Tag = new Tag { Name = Tag },
+            Tag = new Tag { Name = Tag.ToUpper() },
             Description = Description,
             Name = Name
         };

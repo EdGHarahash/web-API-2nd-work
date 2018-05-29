@@ -44,7 +44,6 @@ namespace PrivateForum.Controllers
             }
 
             var topic = await _context.Topics.Include(t=>t.User).Include(t => t.Tag).SingleOrDefaultAsync(m => m.Id == id);
-
             if (topic == null)
             {
                 return NotFound();
@@ -102,7 +101,7 @@ namespace PrivateForum.Controllers
             _context.Topics.Add(topic);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTopic", new { id = topic.Id }, topic);
+            return CreatedAtAction("GetTopic", new { id = topic.Id }, new AllTopicDto(topic));
         }
 
         // DELETE: api/Topics/5

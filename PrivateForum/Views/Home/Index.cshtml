@@ -6,6 +6,7 @@
 <h2>Список пользователей</h2>
 <div class="panel-body">
     <button type="button" id="createNew" class="btn btn-sm btn-primary" OnClick="Show();">Create new Topic</button>
+    <button type="button" id="logOut" class="btn btn-sm btn-primary" OnClick="LogOut();">Create new Topic</button>
 </div>
 <div id="createform" style="display:none;">
     <form display="none" name="topicForm" action="javascript:;" onsubmit="CatchSubmit(this)">
@@ -35,6 +36,14 @@
 
 @section Scripts {
 <script>
+
+    function LogOut() { 
+        $.ajax({
+            url: '/account/logout',
+            type: 'POST'
+        });
+    }
+
     function CloseDetail() { 
         $(".table").toggle();
         $("#detail").toggle();

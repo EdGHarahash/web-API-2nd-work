@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PrivateForum.Entities.Helpers;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace PrivateForum.Entities
     {
         public Tag()
         {
-            Users = new HashSet<ApplicationUser>();
+            
         }
 
         public int Id { get; set; }
@@ -19,6 +20,6 @@ namespace PrivateForum.Entities
         [StringLength(35)]
         public string Name { get; set; }
 
-        public virtual ICollection<ApplicationUser> Users { get; set; }
+        public virtual ICollection<ApplicationUserTag> ApplicationUserTags { get; set; }
     }
 }

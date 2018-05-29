@@ -1,9 +1,12 @@
-﻿
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using PrivateForum.Context;
 using PrivateForum.Entities;
 using PrivateForum.Entities.DTO;
+using PrivateForum.Entities.Helpers;
 
 namespace PrivateForum.Controllers
 {
@@ -12,12 +15,14 @@ namespace PrivateForum.Controllers
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ApplicationContext _context;
 
-        public AccountController(
+        public AccountController(ApplicationContext context,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager
             )
         {
+            _context = context;
             _userManager = userManager;
             _signInManager = signInManager;
         }
@@ -64,10 +69,22 @@ namespace PrivateForum.Controllers
         {
             if (ModelState.IsValid)
             {
+                model.TagsToList();
                 ApplicationUser user = new ApplicationUser { Email = model.Email, UserName = model.Email};
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    foreach (string Tag in model.TagsNames) {
+                        Tag tag = _context.Tags.SingleOrDefault(t => t.Name == Tag);
+                        if (tag == null)
+                        {
+                            tag = new Tag { Name = Tag };
+                            _context.Tags.Add(tag);
+                            _context.SaveChanges();
+                        }
+                            _context.Add(new ApplicationUserTag { ApplicationUser = user, Tag = tag });
+                            _context.SaveChanges();
+                    }
                     await _signInManager.SignInAsync(user, false);
                     return RedirectToAction("Index", "Home");
                 }
@@ -80,6 +97,12 @@ namespace PrivateForum.Controllers
                 }
             }
             return View(model);
+        }
+        [HttpPost]
+        public async Task<IActionResult> LogOut()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("Login");
         }
     }
 }

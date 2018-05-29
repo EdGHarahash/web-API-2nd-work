@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using PrivateForum.Entities;
+using PrivateForum.Entities.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +26,11 @@ namespace PrivateForum.Context
         }
 
 
-
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<ApplicationUserTag>().HasKey(sc => new { sc.ApplicationUserId, sc.TagId});
+            base.OnModelCreating(modelBuilder);
+        }
         //protected override void OnModelCreating(ModelBuilder builder)
         //{
         //    builder.Entity<DataEventRecord>().HasKey(m => m.DataEventRecordId);

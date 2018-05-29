@@ -11,8 +11,8 @@ using System;
 namespace PrivateForum.Migrations
 {
     [DbContext(typeof(ApplicationContext))]
-    [Migration("20180527102538_Tags")]
-    partial class Tags
+    [Migration("20180529174310_tegsusers")]
+    partial class tegsusers
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -184,6 +184,19 @@ namespace PrivateForum.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("PrivateForum.Entities.Helpers.ApplicationUserTag", b =>
+                {
+                    b.Property<string>("ApplicationUserId");
+
+                    b.Property<int>("TagId");
+
+                    b.HasKey("ApplicationUserId", "TagId");
+
+                    b.HasIndex("TagId");
+
+                    b.ToTable("ApplicationUserTag");
+                });
+
             modelBuilder.Entity("PrivateForum.Entities.Invite", b =>
                 {
                     b.Property<int>("Id")
@@ -200,12 +213,32 @@ namespace PrivateForum.Migrations
                     b.ToTable("Invites");
                 });
 
-            modelBuilder.Entity("PrivateForum.Entities.Tag", b =>
+            modelBuilder.Entity("PrivateForum.Entities.Mark", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("ApplicationUserId");
+                    b.Property<bool>("Reject");
+
+                    b.Property<int?>("TopicId");
+
+                    b.Property<string>("UserId");
+
+                    b.Property<int>("Value");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TopicId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Mark");
+                });
+
+            modelBuilder.Entity("PrivateForum.Entities.Tag", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -213,9 +246,7 @@ namespace PrivateForum.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
-
-                    b.ToTable("Tag");
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("PrivateForum.Entities.Topic", b =>
@@ -223,10 +254,10 @@ namespace PrivateForum.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<int>("AverangeMark");
+
                     b.Property<string>("Description")
                         .HasMaxLength(100);
-
-                    b.Property<int>("Mark");
 
                     b.Property<int>("MarkCount");
 
@@ -301,6 +332,19 @@ namespace PrivateForum.Migrations
                         .HasForeignKey("ParentId");
                 });
 
+            modelBuilder.Entity("PrivateForum.Entities.Helpers.ApplicationUserTag", b =>
+                {
+                    b.HasOne("PrivateForum.Entities.ApplicationUser", "ApplicationUser")
+                        .WithMany("ApplicationUserTags")
+                        .HasForeignKey("ApplicationUserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("PrivateForum.Entities.Tag", "Tag")
+                        .WithMany("ApplicationUserTags")
+                        .HasForeignKey("TagId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
             modelBuilder.Entity("PrivateForum.Entities.Invite", b =>
                 {
                     b.HasOne("PrivateForum.Entities.ApplicationUser", "User")
@@ -308,11 +352,15 @@ namespace PrivateForum.Migrations
                         .HasForeignKey("UserId");
                 });
 
-            modelBuilder.Entity("PrivateForum.Entities.Tag", b =>
+            modelBuilder.Entity("PrivateForum.Entities.Mark", b =>
                 {
-                    b.HasOne("PrivateForum.Entities.ApplicationUser")
-                        .WithMany("Tags")
-                        .HasForeignKey("ApplicationUserId");
+                    b.HasOne("PrivateForum.Entities.Topic", "Topic")
+                        .WithMany("Marks")
+                        .HasForeignKey("TopicId");
+
+                    b.HasOne("PrivateForum.Entities.ApplicationUser", "User")
+                        .WithMany("Marks")
+                        .HasForeignKey("UserId");
                 });
 
             modelBuilder.Entity("PrivateForum.Entities.Topic", b =>
