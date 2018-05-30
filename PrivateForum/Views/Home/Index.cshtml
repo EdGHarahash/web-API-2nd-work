@@ -6,7 +6,8 @@
 <h2>Список пользователей</h2>
 <div class="panel-body">
     <button type="button" id="createNew" class="btn btn-sm btn-primary" OnClick="Show();">Create new Topic</button>
-    <button type="button" id="logOut" class="btn btn-sm btn-primary" OnClick="LogOut();">Create new Topic</button>
+    <button type="button" id="logOut" class="btn btn-sm btn-primary" OnClick="LogOut();">LogOut</button>
+    <button type="button" id="invite" class="btn btn-sm btn-primary" OnClick="GetInvites();">Get Invite Token</button>
 </div>
 <div id="createform" style="display:none;">
     <form display="none" name="topicForm" action="javascript:;" onsubmit="CatchSubmit(this)">
@@ -31,11 +32,46 @@
 </div>
 <table id ="allTopics"  style="display:none;" class="table table-condensed table-striped table-bordered">
     <thead><tr><th>Tag</th><th>Заголовок</th><th>Пользователь</th><th></th></tr></thead>
-    <tbody></tbody>
+    <tbody id="allTopicsBody"></tbody>
 </table>
-
+<div id="allInvites" style="display:none;">
+    <button type="button" id="createInvite" class="btn btn-sm btn-primary" OnClick="CreateInvite();">CreateInvite</button>
+    <table class="table table-condensed table-striped table-bordered">
+        <thead><tr><th>Token</th></tr></thead>
+        <tbody id="invites"></tbody>
+    </table>
+</div>
 @section Scripts {
 <script>
+
+    function GetInvites() { 
+        $("#invites tr").remove();
+        $.ajax({
+            url: '/api/invites',
+            type: 'GET',
+            contentType: "application/json",
+            success: function (invites) {
+                var inviterows = "";
+                $.each(invites, function (index, invite) {
+                    inviterows += inviterow(invite);
+                })
+                $("#invites").append(inviterows);
+                $("#allInvites").toggle();
+            }
+        });
+    }
+
+    function CreateInvite() {
+        $.ajax({
+            url: "../api/invites",
+            contentType: "application/json",
+            type: "POST",
+            success: function (invite) {
+                reset();
+                $("#invites").append(inviterow(invite));
+            }
+        })
+    }
 
     function LogOut() { 
         $.ajax({
@@ -45,7 +81,7 @@
     }
 
     function CloseDetail() { 
-        $(".table").toggle();
+        $("#allTopics").toggle();
         $("#detail").toggle();
     }
 
@@ -54,7 +90,6 @@
         if ($("#createNew").text() === "Close") { $("#createNew").html("Create new Topic"); }
         else { $("#createNew").html("Close"); }
     }
-    // Получение всех пользователей
     function GetTopics() {
         $.ajax({
             url: '/api/topics',
@@ -63,10 +98,9 @@
             success: function (topics) {
                 var rows = "";
                 $.each(topics, function (index, topic) {
-                    // добавляем полученные элементы в таблицу
                     rows += row(topic);
                 })
-                $("table tbody").append(rows);
+                $("#allTopics").append(rows);
                 $("#allTopics").toggle();
             }
         });
@@ -79,7 +113,7 @@
             contentType: "application/json",
             success: function (topic) {
                 $("#detail").remove();
-                $("table").after(details(topic)); 
+                $("#allInvites").after(details(topic)); 
             }
         });
     }
@@ -147,6 +181,9 @@
         return "<tr data-rowid='" + topic.id + "'><td>" + topic.tag + "</td>" +
             "<td>" + topic.name + "</td> <td>" + topic.user + "</td>" +
             "<td><a class='moreLink' data-id='" + topic.id + "'>More</a>";
+    }
+    var inviterow = function (invite) {
+        return "<tr data-rowid='" + invite.id + "'><td>" + invite.inviteToken + "</td>";
     }
     // сброс значений формы
     $("#reset").click(function (e) {

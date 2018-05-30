@@ -14,7 +14,7 @@ namespace PrivateForum.Entities
         [Required]
         [StringLength(35, MinimumLength = 5)]
         public string Name { get; set; }
-        [StringLength(100)]
+        
         public string Description { get; set; }
 
         public bool Published { get; set; }

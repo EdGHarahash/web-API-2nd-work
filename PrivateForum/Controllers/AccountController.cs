@@ -74,6 +74,15 @@ namespace PrivateForum.Controllers
                 var result = await _userManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
+                    if (model.InviteToken != null) {
+                        Invite invite = _context.Invites.Include(i => i.User).SingleOrDefault(i => i.InviteToken == model.InviteToken);
+                        if (invite != null) {
+                            user.Parent = invite.User;
+                            _context.Invites.Remove(invite);
+                            _context.SaveChanges();
+                        }
+                    }
+                    user.InviteCount = 5;
                     foreach (string Tag in model.TagsNames) {
                         Tag tag = _context.Tags.SingleOrDefault(t => t.Name == Tag);
                         if (tag == null)

@@ -16,6 +16,8 @@ namespace PrivateForum.Entities.DTO
         public string Password { get; set; }
 
         public string Tags { get; set; }
+
+        public string InviteToken { get; set; }
         
         public string[] TagsNames { get; set; }
 

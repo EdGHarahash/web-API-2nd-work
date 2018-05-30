@@ -11,7 +11,7 @@ using PrivateForum.Context;
 using PrivateForum.Entities;
 using PrivateForum.Entities.DTO;
 
-namespace PrivateForum.Controllers
+namespace PrivateForum.Controllers.API
 {
     [Produces("application/json")]
     [Route("api/Topics")]
@@ -53,42 +53,7 @@ namespace PrivateForum.Controllers
             return Ok(topicDto);
         }
 
-        // PUT: api/Topics/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTopic([FromRoute] int id, [FromBody] Topic topic)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (id != topic.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(topic).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TopicExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
-        // POST: api/Topics
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> PostTopic([FromBody] CreateTopicDto createTopic)
         {
@@ -98,31 +63,15 @@ namespace PrivateForum.Controllers
             }
             Topic topic = createTopic.GetTopic();
             topic.User = _userManager.GetUserAsync(HttpContext.User).Result;
+            Tag tag = _context.Tags.SingleOrDefault(t => t.Name == topic.Tag.Name.ToUpper());
+            if (tag != null)
+            {
+                topic.Tag = tag;
+            }
             _context.Topics.Add(topic);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetTopic", new { id = topic.Id }, new AllTopicDto(topic));
-        }
-
-        // DELETE: api/Topics/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTopic([FromRoute] int id)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var topic = await _context.Topics.SingleOrDefaultAsync(m => m.Id == id);
-            if (topic == null)
-            {
-                return NotFound();
-            }
-
-            _context.Topics.Remove(topic);
-            await _context.SaveChangesAsync();
-
-            return Ok(topic);
         }
 
         private bool TopicExists(int id)
